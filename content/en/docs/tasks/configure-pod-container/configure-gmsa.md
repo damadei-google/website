@@ -83,10 +83,10 @@ credspec:
   DomainJoinConfig:
     DnsName: contoso.com  #DNS Domain Name
     DnsTreeName: contoso.com #DNS Domain Name Root
-    Guid: 244818ae-87ac-4fcd-92ec-e79e5252348a  #GUID
+    Guid: 244818ae-87ac-4fcd-92ec-e79e5252348a  #GUID of Domain
     MachineAccountName: WebApp1 #Username of the GMSA account
     NetBiosName: CONTOSO  #NETBIOS Domain Name
-    Sid: S-1-5-21-2126449477-2524075714-3094792973 #SID of GMSA
+    Sid: S-1-5-21-2126449477-2524075714-3094792973 #SID of Domain
 ```
 
 The above credential spec resource may be saved as `gmsa-Webapp1-credspec.yaml` and applied to the cluster using: `kubectl apply -f gmsa-Webapp1-credspec.yml`
@@ -247,7 +247,7 @@ If the above command corrects the error, you can automate the step by adding the
         lifecycle:
           postStart:
             exec:
-              command: ["powershell.exe","-command","do { Restart-Service -Name netlogon } while ( $($Result = (nltest.exe /query); if ($Result -like '*0x0 NERR_Success*') {return $true} else {return $false}) -eq $false)"]
+              command: ["powershell.exe","-command","do { $success = $false; Restart-Service -Name netlogon; Write-Information 'Restarted netlogon' -InformationAction Continue; $Result = (nltest.exe /query); Write-Information 'nltest /query result: $Result' -InformationAction Continue; if ($Result -like '*0x0 NERR_Success*') { $success = $true } } while ( $success -eq $false )"]
         imagePullPolicy: IfNotPresent
 ```
 
